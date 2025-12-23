@@ -19,6 +19,67 @@ from kaggleease import load
 df = load("titanic")
 ```
 
+## Usage in Google Colab
+
+### 1. Install the package
+In a Colab cell, run:
+```python
+!pip install kaggleease
+```
+
+### 2. Use the module
+```python
+from kaggleease import load
+
+df = load("titanic")
+print(df.head())
+```
+
+### 3. Magic commands in Colab
+```python
+# Load dataset into a variable named 'df'
+%kaggle load titanic --as df
+
+# Preview a dataset
+%kaggle preview titanic
+
+# Search for datasets
+%kaggle search "credit risk"
+```
+
+## Usage in Local Jupyter Notebooks
+
+### 1. Install the package
+```bash
+pip install kaggleease
+```
+
+### 2. Set up Kaggle credentials
+- Go to https://www.kaggle.com/account
+- Download your `kaggle.json` file
+- Place it in `~/.kaggle/kaggle.json` (or `%USERPROFILE%\.kaggle\kaggle.json` on Windows)
+- Set file permissions to 600 (read/write for owner only)
+
+### 3. Use the module
+```python
+from kaggleease import load
+
+df = load("titanic")
+print(df.head())
+```
+
+### 4. Magic commands in Jupyter
+```python
+# Load dataset into a specific variable
+%kaggle load titanic --as df
+
+# Preview dataset
+%kaggle preview titanic
+
+# Search for datasets
+%kaggle search "credit risk"
+```
+
 ## Advanced Features
 
 ### Progress Indication
