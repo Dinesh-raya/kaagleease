@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 import threading
 import logging
+from typing import Optional
 from .errors import AuthError, KaggleEaseError
 import json
 
