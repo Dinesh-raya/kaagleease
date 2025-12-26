@@ -8,6 +8,14 @@ class KaggleEaseError(Exception):
         self.fix_suggestion = fix_suggestion
         self.docs_link = docs_link
 
+    def __str__(self):
+        msg = self.message
+        if self.fix_suggestion:
+            msg += f"\n💡 Suggestion: {self.fix_suggestion}"
+        if self.docs_link:
+            msg += f"\n🔗 Docs: {self.docs_link}"
+        return msg
+
 class AuthError(KaggleEaseError):
     """Raised when Kaggle API authentication fails."""
     def __init__(self, message: str, fix_suggestion: Optional[str] = "Make sure your kaggle.json is in ~/.kaggle/ and has 600 permissions."):
