@@ -31,21 +31,15 @@ class KaggleClient:
     def search_datasets(self, query: str, top: int = 5) -> List[Dict]:
         """
         Search for datasets using the Kaggle REST API.
-        
-        Args:
-            query (str): Search term.
-            top (int): Number of results.
-            
-        Returns:
-            List[Dict]: List of datasets with handle, title, size, and votes.
         """
         try:
             self._ensure_auth()
             url = f"{self.BASE_URL}/datasets/list"
             params = {
                 "search": query,
-                "sortBy": "votes",
-                "pageSize": top
+                "sortBy": "relevance",  # Use relevance for better fuzzy matches
+                "pageSize": top,
+                "page": 1
             }
             response = requests.get(url, auth=self.auth, params=params, timeout=30)
             
@@ -56,12 +50,21 @@ class KaggleClient:
             results = response.json()
             formatted = []
             for d in results:
-                formatted.append({
-                    "handle": d.get("ref"),
-                    "title": d.get("title"),
-                    "size": d.get("totalBytes", 0),
-                    "votes": d.get("votes", 0)
-                })
+                handle = d.get("ref") or d.get("handle")
+                if not handle:
+                    # Some responses use ownerRef/slug instead of ref
+                    owner = d.get("ownerRef")
+                    slug = d.get("slug")
+                    if owner and slug:
+                        handle = f"{owner}/{slug}"
+                
+                if handle:
+                    formatted.append({
+                        "handle": handle,
+                        "title": d.get("title", handle),
+                        "size": int(d.get("totalBytes", 0) or 0),
+                        "votes": int(d.get("voteCount", 0) or d.get("votes", 0) or 0)
+                    })
             return formatted
         except Exception as e:
             logger.debug(f"Kaggle REST search error: {e}")

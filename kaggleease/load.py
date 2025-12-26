@@ -86,9 +86,10 @@ def _get_dataset_files(dataset_handle: str, timeout: int = 30) -> Tuple[List, in
         # Differentiate error types for better user guidance
         error_msg = str(e).lower()
         
-        if "not found" in error_msg or "404" in error_msg:
+        if "not found" in error_msg or "404" in error_msg or "inaccessible" in error_msg:
             # Intelligence: Try to find what they meant
-            fix = "Expected format: 'owner/dataset-name'"
+            fix = "Check the spelling of your dataset handle or use search() to find it."
+            
             if '/' in dataset_handle:
                 from .search import search
                 owner, slug = dataset_handle.split('/')
@@ -99,13 +100,22 @@ def _get_dataset_files(dataset_handle: str, timeout: int = 30) -> Tuple[List, in
                     if names:
                         fix = f"Did you mean one of these? {', '.join(names)}"
                     else:
-                        fix = "Dataset found but files could not be listed. Check if it requires rule acceptance on Kaggle website."
+                        fix = "This dataset might be private or require you to accept rules on the Kaggle website."
             
-            raise DatasetNotFoundError(
-                f"Dataset '{dataset_handle}' not found or inaccessible.",
+            error_class = DatasetNotFoundError
+            final_msg = f"Dataset '{dataset_handle}' not found or inaccessible."
+            
+            if "403" in error_msg or "access denied" in error_msg:
+                from .errors import AuthError
+                error_class = AuthError
+                final_msg = f"Access denied for dataset '{dataset_handle}'."
+                fix = "This dataset might be private or require you to accept rules on the Kaggle website."
+            
+            raise error_class(
+                final_msg,
                 fix_suggestion=fix
             ) from e
-        elif "authentication" in error_msg or "unauthorized" in error_msg or "403" in error_msg:
+        elif "authentication" in error_msg or "unauthorized" in error_msg:
             from .errors import AuthError
             raise AuthError(
                 f"Authentication failed while accessing '{dataset_handle}'.",
