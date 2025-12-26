@@ -94,11 +94,15 @@ def _get_dataset_files(dataset_handle: str, timeout: int = 30) -> Tuple[List, in
                 owner, slug = dataset_handle.split('/')
                 potential = search(slug, top=3)
                 if potential:
-                    names = [p['handle'] for p in potential]
-                    fix = f"Did you mean one of these? {', '.join(names)}"
+                    # Filter out the handle itself if it's already failing
+                    names = [p['handle'] for p in potential if p['handle'].lower() != dataset_handle.lower()]
+                    if names:
+                        fix = f"Did you mean one of these? {', '.join(names)}"
+                    else:
+                        fix = "Dataset found but files could not be listed. Check if it requires rule acceptance on Kaggle website."
             
             raise DatasetNotFoundError(
-                f"Dataset '{dataset_handle}' not found on Kaggle.",
+                f"Dataset '{dataset_handle}' not found or inaccessible.",
                 fix_suggestion=fix
             ) from e
         elif "authentication" in error_msg or "unauthorized" in error_msg or "403" in error_msg:

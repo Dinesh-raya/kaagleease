@@ -69,44 +69,55 @@ class KaggleClient:
 
     def list_files(self, dataset_handle: str) -> List[Dict]:
         """
-        List files in a dataset.
-        
-        Args:
-            dataset_handle (str): owner/slug
-            
-        Returns:
-            List[Dict]: List of file info (name, size).
+        List files in a dataset with self-healing logic for 404 errors.
         """
         self._ensure_auth()
         
-        # Split handle to ensure we don't have malformed segments
         if '/' not in dataset_handle:
              raise DatasetNotFoundError(f"Invalid dataset handle: '{dataset_handle}'. Expected 'owner/slug'.")
-             
-        owner, slug = dataset_handle.split('/', 1)
+        
+        # Normalize: ensure no leading/trailing slashes or spaces
+        handle = dataset_handle.strip().strip('/')
+        owner, slug = handle.split('/', 1)
+        
+        # Try primary endpoint
         url = f"{self.BASE_URL}/datasets/list/files/{owner}/{slug}"
+        logger.debug(f"Trying primary list_files URL: {url}")
         
-        headers = {
-            "Accept": "application/json",
-            "User-Agent": "KaggleEase/1.3.3"
-        }
+        response = requests.get(url, auth=self.auth, timeout=30)
         
-        response = requests.get(url, auth=self.auth, headers=headers, timeout=30)
-        
+        # Fallback: Maybe the handle itself works better?
         if response.status_code == 404:
-            raise DatasetNotFoundError(
-                f"Dataset '{dataset_handle}' not found via API. "
-                "This can happen if the dataset is private, requires rule acceptance, "
-                "or if the handle has changed."
-            )
+            url_alt = f"{self.BASE_URL}/datasets/list/files/{handle}"
+            logger.debug(f"Primary failed, trying alt URL: {url_alt}")
+            response = requests.get(url_alt, auth=self.auth, timeout=30)
+            
+        if response.status_code == 404:
+             # Intelligence: Verify if the dataset even exists via 'view'
+             view_url = f"{self.BASE_URL}/datasets/view/{owner}/{slug}"
+             view_res = requests.get(view_url, auth=self.auth, timeout=10)
+             
+             if view_res.status_code == 404:
+                 raise DatasetNotFoundError(
+                     f"Dataset '{handle}' not found on Kaggle.",
+                     fix_suggestion=f"Check the handle spelling. Verified via view endpoint: 404."
+                 )
+             elif view_res.status_code == 403:
+                 raise AuthError(
+                     f"Access denied for '{handle}'.",
+                     fix_suggestion="This dataset might be private or require you to accept rules on the Kaggle website."
+                 )
+             else:
+                 raise DatasetNotFoundError(
+                     f"Dataset '{handle}' exists but files cannot be listed (Status {response.status_code}).",
+                     fix_suggestion="The dataset might be empty or in a competition-only format not supported by this API."
+                 )
+
         elif response.status_code == 403:
-            raise AuthError(f"Access denied for dataset '{dataset_handle}'. Check your permissions or terms acceptance.")
+            raise AuthError(f"Access denied for '{handle}'. Check your credentials or dataset permissions.")
         elif response.status_code != 200:
             raise Exception(f"Failed to list files (Status {response.status_code}): {response.text}")
             
-        # The list/files response contains a list of File objects with 'name' and 'totalBytes'
         data = response.json()
         files = data if isinstance(data, list) else data.get("files", [])
-        
-        # Standardize for load.py
         return [{"name": f.get("name"), "size": f.get("totalBytes", 0)} for f in files]
