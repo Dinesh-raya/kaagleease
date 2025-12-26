@@ -78,14 +78,29 @@ class KaggleClient:
             List[Dict]: List of file info (name, size).
         """
         self._ensure_auth()
-        url = f"{self.BASE_URL}/datasets/list/files/{dataset_handle}"
         
-        response = requests.get(url, auth=self.auth, timeout=30)
+        # Split handle to ensure we don't have malformed segments
+        if '/' not in dataset_handle:
+             raise DatasetNotFoundError(f"Invalid dataset handle: '{dataset_handle}'. Expected 'owner/slug'.")
+             
+        owner, slug = dataset_handle.split('/', 1)
+        url = f"{self.BASE_URL}/datasets/list/files/{owner}/{slug}"
+        
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": "KaggleEase/1.3.3"
+        }
+        
+        response = requests.get(url, auth=self.auth, headers=headers, timeout=30)
         
         if response.status_code == 404:
-            raise DatasetNotFoundError(f"Dataset '{dataset_handle}' not found.")
+            raise DatasetNotFoundError(
+                f"Dataset '{dataset_handle}' not found via API. "
+                "This can happen if the dataset is private, requires rule acceptance, "
+                "or if the handle has changed."
+            )
         elif response.status_code == 403:
-            raise AuthError(f"Access denied for dataset '{dataset_handle}'. Check your permissions.")
+            raise AuthError(f"Access denied for dataset '{dataset_handle}'. Check your permissions or terms acceptance.")
         elif response.status_code != 200:
             raise Exception(f"Failed to list files (Status {response.status_code}): {response.text}")
             
