@@ -9,20 +9,14 @@ from unittest.mock import MagicMock
 @pytest.fixture
 def mock_kagglehub(monkeypatch):
     """
-    Mock the kagglehub module to prevent actual Internet calls during tests.
+    Mock the kagglehub module globally by replacing it in sys.modules.
     """
     mock = MagicMock()
     mock.dataset_download.return_value = "/tmp/mock/dataset"
     mock.competition_download.return_value = "/tmp/mock/competition"
-    # Fix for shadowing: Import the actual module object
-    import sys
-    # Ensure we get the module, not the function from __init__
-    if 'kaggleease.load' not in sys.modules:
-        import kaggleease.load
     
-    load_module = sys.modules['kaggleease.load']
-    
-    monkeypatch.setattr(load_module, "kagglehub", mock)
+    # Nuclear Option: Patch sys.modules directly so ANY import gets the mock
+    monkeypatch.setitem(sys.modules, "kagglehub", mock)
     return mock
 
 @pytest.fixture
@@ -31,28 +25,23 @@ def mock_auth(monkeypatch):
     Mock authentication to always succeed.
     """
     mock = MagicMock()
-    # We need to patch where it is imported in load.py
-    import sys
-    if 'kaggleease.load' not in sys.modules:
-        import kaggleease.load
-    load_module = sys.modules['kaggleease.load']
-    
-    monkeypatch.setattr(load_module, "setup_auth", mock)
+    # Since load.py now does 'from . import auth' and calls 'auth.setup_auth()',
+    # patching 'kaggleease.auth.setup_auth' works globally!
+    import kaggleease.auth
+    monkeypatch.setattr(kaggleease.auth, "setup_auth", mock)
     return mock
 
 @pytest.fixture
-def mock_metadata(monkeypatch):
+def mock_client(monkeypatch):
     """
-    Mock the metadata resolution to avoid network calls.
+    Mock the KaggleClient class via attribute patching.
     """
     mock = MagicMock()
-    # files, total_size, res_type, resolved_handle
-    mock.return_value = ([], 0, "dataset", "test/dataset")
+    mock.return_value.list_files.return_value = [
+        {"name": "train.csv", "size": 1024, "type": "dataset"}
+    ]
     
-    import sys
-    if 'kaggleease.load' not in sys.modules:
-        import kaggleease.load
-    load_module = sys.modules['kaggleease.load']
-    
-    monkeypatch.setattr(load_module, "_get_dataset_files", mock)
+    # Import the module so we can patch the class attribute on it
+    import kaggleease.client
+    monkeypatch.setattr(kaggleease.client, "KaggleClient", mock)
     return mock

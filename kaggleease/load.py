@@ -4,7 +4,7 @@ from typing import Tuple, List, Optional, Union
 import pandas as pd
 from pathlib import Path
 import logging
-from .auth import setup_auth
+from . import auth
 from .cache import get_dataset_path
 from .errors import (
     DataFormatError,
@@ -76,8 +76,8 @@ def _get_dataset_files(dataset_handle, timeout=300):
     Returns: (standard_files, total_size, resource_type, resolved_handle)
     """
     try:
-        from .client import KaggleClient
-        client = KaggleClient()
+        import kaggleease.client
+        client = kaggleease.client.KaggleClient()
         files = client.list_files(dataset_handle)
         
         # files is a list of dicts like [{"name": "...", "size": ..., "type": "..."}]
@@ -185,7 +185,7 @@ def load(dataset_handle: str, file: Optional[str] = None, timeout: int = 300, **
     """
     The main function to load a Kaggle dataset into a pandas DataFrame or return the path.
     """
-    setup_auth()
+    auth.setup_auth()
     
     # 1. Resolve files, resource type, and resolved handle
     files, total_size, res_type, resolved_handle = _get_dataset_files(dataset_handle, timeout=timeout)
