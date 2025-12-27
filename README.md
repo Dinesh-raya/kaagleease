@@ -1,6 +1,12 @@
 ![KaggleEase Banner](https://github.com/Dinesh-raya/kaagleease/blob/main/kaggleease_banner.jpg)
 
 # KaggleEase 🚀
+
+![CI](https://github.com/Dinesh-raya/kaagleease/actions/workflows/ci.yml/badge.svg)
+![PyPI](https://img.shields.io/pypi/v/kaggleease)
+![Python](https://img.shields.io/pypi/pyversions/kaggleease)
+![License](https://img.shields.io/github/license/Dinesh-raya/kaagleease)
+
 ### The Universal Kaggle Gateway for Data Scientists
 
 KaggleEase is a minimalist, high-performance Python library designed to bridge the gap between Kaggle's vast data ecosystem and your local or Colab development environment. It replaces the heavy official Kaggle package with a smart, self-healing REST client that "just works."
@@ -91,10 +97,22 @@ If a dataset has an obscured API (like `heptapod/titanic`), KaggleEase bypassed 
 
 ---
 
-## 🤝 Contributing & Support
-Built by Data Scientists, for Data Scientists.
+## 🤝 Build with Us!
+
+KaggleEase is an **Open Source** project built by Data Scientists, for Data Scientists. We believe in "No-Crash" resilience and frictionless data access.
+
+### 🚀 Want to contribute?
+We have created dedicated resources to help you get started immediately:
+
+1.  **[Contribution Guide (CONTRIBUTING.md)](CONTRIBUTING.md)**: Steps to set up your dev environment and run tests.
+2.  **[Knowledge Transfer Handbook (KT_HANDBOOK.md)](KT_HANDBOOK.md)**: A complete brain-dump of the architecture, modules, and design philosophy. Perfect for freshers!
+
+**We welcome Pull Requests!** Whether it's adding support for a new file format (like `.avro` or `.feather`), fixing a bug, or improving documentation, your help is appreciated. 
+
+---
+
+### 🌐 Connect
 - **GitHub**: [Dinesh-raya/kaagleease](https://github.com/Dinesh-raya/kaagleease)
 - **PyPI**: [kaggleease](https://pypi.org/project/kaggleease/)
 
----
-*KaggleEase v1.3.9 - The "Universal Resilience" Release.*
+*License: MIT*
