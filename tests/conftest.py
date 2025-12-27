@@ -4,7 +4,7 @@ import os
 from unittest.mock import MagicMock
 
 # Ensure the package is importable
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# sys.path hacking removed; relying on pip install -e .
 
 @pytest.fixture
 def mock_kagglehub(monkeypatch):
