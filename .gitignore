@@ -1,0 +1,16 @@
+.pypirc
+kaggle.json
+dist/
+dist_pkg/dist/
+*.pyc
+__pycache__/
+.env
+.agent/
+.gemini/
+.DS_Store
+venv/
+.venv/
+build/
+*.egg-info/
+*.whl
+*.tar.gz
