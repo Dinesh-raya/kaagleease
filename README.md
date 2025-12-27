@@ -1,4 +1,4 @@
-![KaggleEase Banner](https://github.com/Dinesh-raya/kaagleease/raw/main/kaggleease_banner_1766798647754.png)
+![KaggleEase Banner](https://github.com/Dinesh-raya/kaagleease/blob/main/kaggleease_banner.jpg)
 
 # KaggleEase 🚀
 ### The Universal Kaggle Gateway for Data Scientists
