@@ -1,6 +1,7 @@
 """
 KaggleEase: The fastest, notebook-first way to load Kaggle datasets.
 """
+__version__ = "1.3.7"
 
 from .load import load
 from .search import search
