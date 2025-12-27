@@ -12,6 +12,7 @@ from .errors import (
     MultipleFilesError,
     UnsupportedFormatError,
     KaggleEaseError,
+    NetworkError,
 )
 import kagglehub
 from .progress import check_memory_safety

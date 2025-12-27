@@ -21,19 +21,24 @@ class AuthError(KaggleEaseError):
     def __init__(self, message: str, fix_suggestion: Optional[str] = "Make sure your kaggle.json is in ~/.kaggle/ and has 600 permissions."):
         super().__init__(message, fix_suggestion=fix_suggestion, docs_link="https://github.com/Kaggle/kaggle-api#creds")
 
-class MultipleFilesError(KaggleEaseError):
-    """Raised when a dataset contains multiple ambiguous files."""
-    def __init__(self, message: str, fix_suggestion: Optional[str] = "Specify a specific file using the 'file' parameter."):
-        super().__init__(message, fix_suggestion=fix_suggestion)
-
-class UnsupportedFormatError(KaggleEaseError):
-    """Raised when a dataset contains no supported file formats."""
-    def __init__(self, message: str, fix_suggestion: Optional[str] = "KaggleEase support CSV and Parquet files. Check your dataset contents."):
+class NetworkError(KaggleEaseError):
+    """Raised when network connectivity issues occur."""
+    def __init__(self, message: str, fix_suggestion: Optional[str] = "Check your internet connection or proxy settings."):
         super().__init__(message, fix_suggestion=fix_suggestion)
 
 class DataFormatError(KaggleEaseError):
     """Generic error for data format issues."""
     pass
+
+class MultipleFilesError(DataFormatError):
+    """Raised when a dataset contains multiple ambiguous files."""
+    def __init__(self, message: str, fix_suggestion: Optional[str] = "Specify a specific file using the 'file' parameter."):
+        super().__init__(message, fix_suggestion=fix_suggestion)
+
+class UnsupportedFormatError(DataFormatError):
+    """Raised when a dataset contains no supported file formats."""
+    def __init__(self, message: str, fix_suggestion: Optional[str] = "KaggleEase support CSV and Parquet files. Check your dataset contents."):
+        super().__init__(message, fix_suggestion=fix_suggestion)
 
 class DatasetNotFoundError(KaggleEaseError):
     """Raised when a dataset cannot be found on Kaggle."""

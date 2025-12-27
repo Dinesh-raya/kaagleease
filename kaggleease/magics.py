@@ -1,4 +1,5 @@
 import argparse
+import shlex
 from typing import Any
 import logging
 from IPython.core.magic import Magics, magics_class, line_magic
@@ -10,21 +11,20 @@ from .errors import KaggleEaseError
 
 logger = logging.getLogger(__name__)
 
-@magics_class
-class KaggleMagics(Magics):
-    def __init__(self, shell: Any) -> None:
-        super(KaggleMagics, self).__init__(shell)
-        # Don't pollute user namespace on initialization
+class KaggleController:
+    """
+    Decoupled controller for handling %kaggle commands.
+    Designed to be testable without an IPython kernel.
+    """
+    def __init__(self, load_fn=core_load, search_fn=core_search, user_ns=None):
+        self.load_fn = load_fn
+        self.search_fn = search_fn
+        self.user_ns = user_ns if user_ns is not None else {}
 
-    @line_magic
-    def kaggle(self, line: str) -> None:
+    def handle_command(self, line: str) -> dict:
         """
-        A magic command to interact with the KaggleEase library.
-        
-        Usage:
-            %kaggle load <dataset> [--file <filename>] [--as <varname>]
-            %kaggle preview <dataset> [--file <filename>]
-            %kaggle search <query>
+        Parses the command line and executes the logic.
+        Returns a dict: {'type': 'df'|'text'|'error', 'content': ..., 'message': str}
         """
         parser = argparse.ArgumentParser(prog="%kaggle", add_help=False)
         subparsers = parser.add_subparsers(dest="command", help="Available commands")
@@ -49,54 +49,95 @@ class KaggleMagics(Magics):
         search_parser.add_argument("--top", type=int, default=5, help="Maximum number of results to return")
 
         try:
-            # Manually handle empty line or -h/--help
             if not line.strip() or line.strip() in ('-h', '--help'):
-                display(Markdown(f"<pre>{parser.format_help()}</pre>"))
-                return
+                 return {'type': 'help', 'content': parser.format_help()}
 
-            args = parser.parse_args(line.split())
+            args = parser.parse_args(shlex.split(line))
 
             if args.command == "load":
-                df = core_load(args.dataset, file=args.file, timeout=args.timeout)
-                self.shell.user_ns[args.dest_var] = df
-                logger.info(f"Dataset loaded into variable '{args.dest_var}'.")
-                display(df.head(5))
+                df = self.load_fn(args.dataset, file=args.file, timeout=args.timeout)
+                # Side effect: inject into namespace
+                self.user_ns[args.dest_var] = df
+                return {
+                    'type': 'df', 
+                    'content': df, 
+                    'message': f"Dataset loaded into variable '{args.dest_var}'."
+                }
 
             elif args.command == "preview":
-                df = core_load(args.dataset, file=args.file, timeout=args.timeout)
-                logger.info("Previewing dataset:")
-                display(df.head(5))
+                df = self.load_fn(args.dataset, file=args.file, timeout=args.timeout)
+                return {
+                    'type': 'df',
+                    'content': df,
+                    'message': "Previewing dataset:"
+                }
                 
             elif args.command == "search":
-                results = core_search(args.query, top=args.top, timeout=args.timeout)
-                if results:
-                    # Simple markdown table for display
-                    md = "| Handle | Title | Size | Votes |\n"
-                    md += "|---|---|---|---|\n"
-                    for r in results:
-                        md += f"| {r['handle']} | {r['title']} | {r['size']} | {r['votes']} |\n"
-                    display(Markdown(md))
+                results = self.search_fn(args.query, top=args.top, timeout=args.timeout)
+                return {
+                    'type': 'search_results',
+                    'content': results,
+                    'message': ""
+                }
+            
+            return {'type': 'help', 'content': parser.format_help()}
 
         except KaggleEaseError as e:
+            return {'type': 'error', 'content': e}
+        except SystemExit:
+            return {'type': 'help', 'content': parser.format_help()}
+        except Exception as e:
+            return {'type': 'fatal_error', 'content': str(e)}
+
+@magics_class
+class KaggleMagics(Magics):
+    def __init__(self, shell: Any) -> None:
+        super(KaggleMagics, self).__init__(shell)
+        self.controller = KaggleController(user_ns=shell.user_ns)
+
+    @line_magic
+    def kaggle(self, line: str) -> None:
+        """
+        A magic command to interact with the KaggleEase library.
+        """
+        # Ensure namespace is up to date (though reference should be live)
+        self.controller.user_ns = self.shell.user_ns
+        
+        result = self.controller.handle_command(line)
+        
+        if result['type'] == 'help':
+            display(Markdown(f"<pre>{result['content']}</pre>"))
+            
+        elif result['type'] == 'df':
+            logger.info(result['message'])
+            display(result['content'].head(5))
+            
+        elif result['type'] == 'search_results':
+            results = result['content']
+            if results:
+                md = "| Handle | Title | Size | Votes |\n"
+                md += "|---|---|---|---|\n"
+                for r in results:
+                    md += f"| {r['handle']} | {r['title']} | {r['size']} | {r['votes']} |\n"
+                display(Markdown(md))
+            else:
+                logger.info("No results found.")
+                
+        elif result['type'] == 'error':
+            e = result['content']
             msg = f"### ❌ KaggleEase Error\n\n**{e.message}**\n\n"
             if hasattr(e, 'fix_suggestion') and e.fix_suggestion:
                 msg += f"> **💡 Fix Suggestion:** {e.fix_suggestion}\n\n"
             if hasattr(e, 'docs_link') and e.docs_link:
                 msg += f"🔗 [Documentation]({e.docs_link})\n"
             display(Markdown(msg))
-        except SystemExit:
-            # Argparse calls SystemExit on --help or error, catch it to prevent kernel crash
-            display(Markdown(f"<pre>{parser.format_help()}</pre>"))
-        except Exception as e:
-            # Catch any other unexpected errors
-            display(Markdown(f"**An unexpected error occurred:** {e}"))
+            
+        elif result['type'] == 'fatal_error':
+             display(Markdown(f"**An unexpected error occurred:** {result['content']}"))
 
 def register_magics() -> None:
     """
     Function to register the magics with IPython.
-
-    This function attempts to register the KaggleMagics class with IPython
-    if we're in an IPython environment. If not, it silently passes.
     """
     try:
         from IPython import get_ipython
@@ -104,4 +145,4 @@ def register_magics() -> None:
         if ipython:
             ipython.register_magics(KaggleMagics)
     except ImportError:
-        pass # Not in an IPython environment
+        pass 
