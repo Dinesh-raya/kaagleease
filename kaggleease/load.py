@@ -13,6 +13,7 @@ from .errors import (
     UnsupportedFormatError,
     KaggleEaseError,
 )
+import kagglehub
 from .progress import check_memory_safety
 
 logger = logging.getLogger(__name__)
@@ -210,7 +211,7 @@ def load(dataset_handle: str, file: Optional[str] = None, timeout: int = 300, **
                  is_obscured = True
 
     # 3. Download via KaggleHub
-    import kagglehub
+    # import kagglehub (Moved to top-level)
     try:
         if res_type == "competition":
             comp_slug = resolved_handle.split('/')[-1]
