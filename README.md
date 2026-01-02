@@ -9,6 +9,8 @@
 
 ### The Universal Kaggle Gateway for Data Scientists
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Dinesh-raya/kaagleease)
+
 KaggleEase is a minimalist, high-performance Python library designed to bridge the gap between Kaggle's vast data ecosystem and your local or Colab development environment. It replaces the heavy official Kaggle package with a smart, self-healing REST client that "just works."
 
 ---
