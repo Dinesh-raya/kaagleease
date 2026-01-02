@@ -24,7 +24,7 @@ Kaggle's official API (`kaggle`) and library (`kagglehub`) are powerful but can 
 
 The flow of a typical command `%kaggle load titanic` looks like this:
 
-```mermaid
+``mermaid
 graph TD
     User[User (Notebook)] -->|%kaggle load titanic| Magic[magics.py]
     Magic -->|load("titanic")| Load[load.py]
@@ -36,7 +36,7 @@ graph TD
     Load -->|4. Download| Hub[kagglehub / Internal]
     Load -->|5. Read File| Pandas[pandas]
     Pandas -->|DataFrame| User
-```
+``
 
 ---
 
