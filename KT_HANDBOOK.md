@@ -26,7 +26,7 @@ The flow of a typical command `%kaggle load titanic` looks like this:
 
 ```mermaid
 graph TD
-    User[User (Notebook)] -->|"percent kaggle load titanic"| Magic[magics.py]
+    User[User (Notebook)] -->|"percentkaggle load titanic"| Magic[magics.py]
     Magic -->|load("titanic")| Load[load.py]
     Load -->|1. Setup Auth| Auth[auth.py]
     Load -->|2. Resolve Metadata| Client[client.py]
