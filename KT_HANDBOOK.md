@@ -2,7 +2,7 @@
 
 Welcome to the team! 🚀 
 
-This document is designed to get you up to speed with **KaggleEase** as quickly as possible. It covers the "Why", the "How", and the deep technical details of the implementation. Think of this as a br[...]
+This document is designed to get you up to speed with **KaggleEase** as quickly as possible. It covers the "Why", the "How", and the deep technical details of the implementation. Think of this as a br[...] 
 
 ---
 
@@ -26,7 +26,7 @@ The flow of a typical command `%kaggle load titanic` looks like this:
 
 ```mermaid
 graph TD
-    User[User (Notebook)] -->|%25kaggle load titanic| Magic[magics.py]
+    User[User (Notebook)] -->|"percent kaggle load titanic"| Magic[magics.py]
     Magic -->|load("titanic")| Load[load.py]
     Load -->|1. Setup Auth| Auth[auth.py]
     Load -->|2. Resolve Metadata| Client[client.py]
@@ -37,6 +37,10 @@ graph TD
     Load -->|5. Read File| Pandas[pandas]
     Pandas -->|DataFrame| User
 ```
+
+Caption: `%kaggle load titanic`
+
+Note: the actual notebook magic is `%kaggle load titanic` (with the leading percent sign).
 
 ---
 
