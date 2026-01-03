@@ -24,23 +24,23 @@ Kaggle's official API (`kaggle`) and library (`kagglehub`) are powerful but can 
 
 The flow of a typical command `%kaggle load titanic` looks like this:
 
-```mermaid
-graph TD
-    User[User (Notebook)] -->|"percentkaggle load titanic"| Magic[magics.py]
-    Magic -->|load("titanic")| Load[load.py]
-    Load -->|1. Setup Auth| Auth[auth.py]
-    Load -->|2. Resolve Metadata| Client[client.py]
-    Client -->|List Files| JSON[Kaggle API]
-    Load -->|3. Smart Resolution| Logic[Auto-Resolve Logic]
-    Logic -->|Decide File| FileSelect[train.csv]
-    Load -->|4. Download| Hub[kagglehub / Internal]
-    Load -->|5. Read File| Pandas[pandas]
-    Pandas -->|DataFrame| User
+- User (Notebook)
+  - triggers the KaggleEase magic: %kaggle load titanic
+- magics.py
+  - parses the magic and calls load("titanic")
+- load.py
+  - 1. Setup Auth (auth.py)
+  - 2. Resolve Metadata (client.py)
+  - 3. Smart Resolution (search/logic)
+  - 4. Download (kagglehub)
+  - 5. Read File (pandas) → returns DataFrame
+
+Example (exact notebook command)
+```bash
+%kaggle load titanic
 ```
 
-Caption: `%kaggle load titanic`
-
-Note: the actual notebook magic is `%kaggle load titanic` (with the leading percent sign).
+Note: the diagram previously used a Mermaid label containing a percent sign which caused Mermaid parsing errors in GitHub's renderer. Above we replaced the diagram with a simple Markdown flow and preserved the exact `%kaggle load titanic` example in a code block for clarity and copy-paste.
 
 ---
 
