@@ -1,0 +1,468 @@
+﻿.\venv\Scripts\python
+.exe : Could not 
+find platform 
+independent 
+libraries <prefix>
+At line:1 char:1
++ .\venv\Scripts\pyth
+on.exe -m pytest 
+tests/ -v 
+--cov=kaggleease > 
+pyte ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Could n   
+ ot find ...rarie    
+s <prefix>:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+============================= test session starts =============================
+platform win32 -- Python 3.14.0, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\dines\OneDrive\Documents\project\kaagleease
+configfile: pyproject.toml
+plugins: cov-7.0.0
+collected 9 items
+
+tests\test_basic.py F                                                    [ 11%]
+tests\test_errors.py ....                                                [ 55%]
+tests\test_magics.py ....                                                [100%]
+
+================================== FAILURES ===================================
+____________________________ test_mocked_download _____________________________
+
+dataset_handle = 'test/dataset', file = None, timeout = 300, kwargs = {}
+files = [KaggleFile(name='train.csv', size=1024, type='dataset')]
+total_size = 1024, res_type = 'dataset', resolved_handle = 'test/dataset'
+check_memory_safety = <function check_memory_safety at 0x00000202E7AD96F0>
+is_obscured = False, selected_file = 'train.csv'
+
+    def load(dataset_handle: str, file: Optional[str] = None, timeout: int = 300, **kwargs) -> Union[pd.DataFrame, str]:
+        """
+        The universal gateway to load Kaggle data into memory or disk.
+    
+        This function handles authentication, dataset resolution, downloads,
+        and automatic loading of various tabular formats (CSV, Parquet, JSON, Excel, SQLite).
+    
+        Args:
+            dataset_handle (str): The Kaggle dataset handle (e.g., 'owner/slug') or slug (e.g., 'titanic').
+            file (str, optional): Specific filename to load. If omitted, KaggleEase auto-resolves the best file.
+            timeout (int): Max time in seconds for the download operation. Default is 300s.
+            **kwargs: Additional arguments passed to the underlying pandas read function
+                      (e.g., `chunksize=1000`, `index_col=0`).
+    
+        Returns:
+            Union[pd.DataFrame, str]: A pandas DataFrame if a supported tabular file is found,
+                                     otherwise the local directory path string.
+    
+        Raises:
+            DatasetNotFoundError: If the repository handle is invalid or not reachable.
+            AuthError: If Kaggle credentials are missing or invalid.
+            DataFormatError: if the specified file is not found or unsupported.
+            KaggleEaseError: For general library failures.
+    
+        Example:
+            >>> df = load("titanic")
+            >>> df_custom = load("user/data", file="raw.csv", index_col="id")
+        """
+        auth.setup_auth()
+    
+        # 1. Resolve files, resource type, and resolved handle
+        files, total_size, res_type, resolved_handle = _get_dataset_files(dataset_handle, timeout=timeout)
+    
+        # Check memory safety
+        from .progress import check_memory_safety
+        check_memory_safety(total_size)
+    
+        # 2. Resolve specific file path if possible
+        is_obscured = any("__AUTO_RESOLVE_" in f.name for f in files)
+    
+        selected_file = file
+        if not is_obscured:
+            try:
+                 # This filters for CSV/Parquet/JSON/Excel/SQLite
+                 selected_file = _resolve_file_path(files, dataset_handle, file)
+            except Exception:
+                 # If resolution fails but it's a competition or obscured, we swap to late-res
+                 if res_type == "competition":
+                     is_obscured = True
+                 else:
+                     # If no tabular files found in metadata, we might want to just download and return path
+                     is_obscured = True
+    
+        # 3. Download via KaggleHub
+        # import kagglehub (Moved to top-level)
+        try:
+            if res_type == "competition":
+                comp_slug = resolved_handle.split('/')[-1]
+                path = kagglehub.competition_download(comp_slug)
+            else:
+>               path = kagglehub.dataset_download(resolved_handle)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+kaggleease\load.py:233: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\kagglehub\datasets.py:43: in dataset_download
+    path, _ = registry.dataset_resolver(h, path, force_download=force_download)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+venv\Lib\site-packages\kagglehub\registry.py:28: in __call__
+    return impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+venv\Lib\site-packages\kagglehub\resolver.py:29: in __call__
+    path, version = self._resolve(handle, path, force_download=force_download)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+venv\Lib\site-packages\kagglehub\http_resolver.py:107: in _resolve
+    h = h.with_version(_get_current_version(api_client, h))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+api_client = <kagglehub.clients.KaggleApiV1Client object at 0x00000202E7B1D160>
+h = DatasetHandle(owner='test', dataset='dataset', version=None)
+
+    def _get_current_version(api_client: KaggleApiV1Client, h: ResourceHandle) -> int:
+        # Check if there's a Package in scope which has stored a version number used when it was created.
+        version_from_package_scope = PackageScope.get_version(h)
+        if version_from_package_scope is not None:
+            return version_from_package_scope
+    
+        if isinstance(h, ModelHandle):
+            json_response = api_client.get(_build_get_instance_url_path(h), h)
+            if MODEL_INSTANCE_VERSION_FIELD not in json_response:
+                msg = f"Invalid GetModelInstance API response. Expected to include a {MODEL_INSTANCE_VERSION_FIELD} field"
+                raise ValueError(msg)
+    
+            return json_response[MODEL_INSTANCE_VERSION_FIELD]
+    
+        elif isinstance(h, DatasetHandle):
+            json_response = api_client.get(_build_get_dataset_url_path(h), h)
+            if DATASET_CURRENT_VERSION_FIELD not in json_response:
+                msg = f"Invalid GetDataset API response. Expected to include a {DATASET_CURRENT_VERSION_FIELD} field"
+>               raise ValueError(msg)
+E               ValueError: Invalid GetDataset API response. Expected to include a currentVersionNumber field
+
+venv\Lib\site-packages\kagglehub\http_resolver.py:293: ValueError
+
+During handling of the above exception, another exception occurred:
+
+dataset_handle = 'test/dataset', file = None, timeout = 300, kwargs = {}
+files = [KaggleFile(name='train.csv', size=1024, type='dataset')]
+total_size = 1024, res_type = 'dataset', resolved_handle = 'test/dataset'
+check_memory_safety = <function check_memory_safety at 0x00000202E7AD96F0>
+is_obscured = False, selected_file = 'train.csv'
+
+    def load(dataset_handle: str, file: Optional[str] = None, timeout: int = 300, **kwargs) -> Union[pd.DataFrame, str]:
+        """
+        The universal gateway to load Kaggle data into memory or disk.
+    
+        This function handles authentication, dataset resolution, downloads,
+        and automatic loading of various tabular formats (CSV, Parquet, JSON, Excel, SQLite).
+    
+        Args:
+            dataset_handle (str): The Kaggle dataset handle (e.g., 'owner/slug') or slug (e.g., 'titanic').
+            file (str, optional): Specific filename to load. If omitted, KaggleEase auto-resolves the best file.
+            timeout (int): Max time in seconds for the download operation. Default is 300s.
+            **kwargs: Additional arguments passed to the underlying pandas read function
+                      (e.g., `chunksize=1000`, `index_col=0`).
+    
+        Returns:
+            Union[pd.DataFrame, str]: A pandas DataFrame if a supported tabular file is found,
+                                     otherwise the local directory path string.
+    
+        Raises:
+            DatasetNotFoundError: If the repository handle is invalid or not reachable.
+            AuthError: If Kaggle credentials are missing or invalid.
+            DataFormatError: if the specified file is not found or unsupported.
+            KaggleEaseError: For general library failures.
+    
+        Example:
+            >>> df = load("titanic")
+            >>> df_custom = load("user/data", file="raw.csv", index_col="id")
+        """
+        auth.setup_auth()
+    
+        # 1. Resolve files, resource type, and resolved handle
+        files, total_size, res_type, resolved_handle = _get_dataset_files(dataset_handle, timeout=timeout)
+    
+        # Check memory safety
+        from .progress import check_memory_safety
+        check_memory_safety(total_size)
+    
+        # 2. Resolve specific file path if possible
+        is_obscured = any("__AUTO_RESOLVE_" in f.name for f in files)
+    
+        selected_file = file
+        if not is_obscured:
+            try:
+                 # This filters for CSV/Parquet/JSON/Excel/SQLite
+                 selected_file = _resolve_file_path(files, dataset_handle, file)
+            except Exception:
+                 # If resolution fails but it's a competition or obscured, we swap to late-res
+                 if res_type == "competition":
+                     is_obscured = True
+                 else:
+                     # If no tabular files found in metadata, we might want to just download and return path
+                     is_obscured = True
+    
+        # 3. Download via KaggleHub
+        # import kagglehub (Moved to top-level)
+        try:
+            if res_type == "competition":
+                comp_slug = resolved_handle.split('/')[-1]
+                path = kagglehub.competition_download(comp_slug)
+            else:
+                path = kagglehub.dataset_download(resolved_handle)
+    
+            # 4. Late Resolution / Fallback SCAN
+            # Supported extensions for auto-loading
+            tabular_exts = ('.csv', '.parquet', '.json', '.xlsx', '.xls', '.sqlite', '.db')
+    
+            if is_obscured or not selected_file:
+                available_files = []
+                for root, _, fs in os.walk(path):
+                    for f in fs:
+                        if f.lower().endswith(tabular_exts):
+                            available_files.append(os.path.join(root, f))
+    
+                if not available_files:
+                     logger.info(f"\u2139\ufe0f No tabular data found in '{dataset_handle}'. Returning directory path.")
+                     return path
+    
+                # If multiple, prefer the one matching 'file' if provided
+                if file:
+                    matches = [f for f in available_files if file.lower() in f.lower()]
+                    full_selected_path = matches[0] if matches else available_files[0]
+                else:
+                    full_selected_path = available_files[0]
+            else:
+                # Standard path construction
+                if os.path.isabs(selected_file):
+                    full_selected_path = selected_file
+                else:
+                    full_selected_path = os.path.join(path, selected_file)
+    
+            # 5. Load into Pandas based on extension
+            f_lower = full_selected_path.lower()
+            logger.info(f"Loading {os.path.basename(full_selected_path)}...")
+    
+            if f_lower.endswith('.csv'):
+                return pd.read_csv(full_selected_path, **kwargs)
+            elif f_lower.endswith('.parquet'):
+                return pd.read_parquet(full_selected_path, **kwargs)
+            elif f_lower.endswith('.json'):
+                return pd.read_json(full_selected_path, **kwargs)
+            elif f_lower.endswith(('.xlsx', '.xls')):
+                return pd.read_excel(full_selected_path, **kwargs)
+            elif f_lower.endswith(('.sqlite', '.db')):
+                import sqlite3
+                conn = sqlite3.connect(full_selected_path)
+                # Try to get the first table name
+                cursor = conn.cursor()
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+                table_name = cursor.fetchone()
+                if table_name:
+                    df = pd.read_sql_query(f"SELECT * FROM {table_name[0]}", conn, **kwargs)
+                    conn.close()
+                    return df
+                conn.close()
+                return full_selected_path # Return path if no tables found
+            else:
+                logger.warning(f"Unsupported format for auto-loading: {f_lower}. Returning path.")
+                return full_selected_path
+    
+        except Exception as e:
+            from .errors import DatasetNotFoundError, AuthError
+            if isinstance(e, (DatasetNotFoundError, AuthError, KaggleEaseError)):
+                raise e
+            logger.error(f"Load failed: {e}. Returning path as fallback.")
+            # Final fallback: return the path instead of crashing
+            try:
+>               return path
+                       ^^^^
+E               UnboundLocalError: cannot access local variable 'path' where it is not associated with a value
+
+kaggleease\load.py:299: UnboundLocalError
+
+During handling of the above exception, another exception occurred:
+
+mock_kagglehub = <MagicMock id='2211499474096'>
+mock_auth = <MagicMock id='2211499469728'>
+mock_client = <MagicMock id='2211499472752'>
+
+    def test_mocked_download(mock_kagglehub, mock_auth, mock_client):
+        """Test that download calls the mock instead of real internet."""
+        # This should NOT crash even without internet if mocks work
+        from kaggleease import load
+>       load("test/dataset")
+
+tests\test_basic.py:11: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+dataset_handle = 'test/dataset', file = None, timeout = 300, kwargs = {}
+files = [KaggleFile(name='train.csv', size=1024, type='dataset')]
+total_size = 1024, res_type = 'dataset', resolved_handle = 'test/dataset'
+check_memory_safety = <function check_memory_safety at 0x00000202E7AD96F0>
+is_obscured = False, selected_file = 'train.csv'
+
+    def load(dataset_handle: str, file: Optional[str] = None, timeout: int = 300, **kwargs) -> Union[pd.DataFrame, str]:
+        """
+        The universal gateway to load Kaggle data into memory or disk.
+    
+        This function handles authentication, dataset resolution, downloads,
+        and automatic loading of various tabular formats (CSV, Parquet, JSON, Excel, SQLite).
+    
+        Args:
+            dataset_handle (str): The Kaggle dataset handle (e.g., 'owner/slug') or slug (e.g., 'titanic').
+            file (str, optional): Specific filename to load. If omitted, KaggleEase auto-resolves the best file.
+            timeout (int): Max time in seconds for the download operation. Default is 300s.
+            **kwargs: Additional arguments passed to the underlying pandas read function
+                      (e.g., `chunksize=1000`, `index_col=0`).
+    
+        Returns:
+            Union[pd.DataFrame, str]: A pandas DataFrame if a supported tabular file is found,
+                                     otherwise the local directory path string.
+    
+        Raises:
+            DatasetNotFoundError: If the repository handle is invalid or not reachable.
+            AuthError: If Kaggle credentials are missing or invalid.
+            DataFormatError: if the specified file is not found or unsupported.
+            KaggleEaseError: For general library failures.
+    
+        Example:
+            >>> df = load("titanic")
+            >>> df_custom = load("user/data", file="raw.csv", index_col="id")
+        """
+        auth.setup_auth()
+    
+        # 1. Resolve files, resource type, and resolved handle
+        files, total_size, res_type, resolved_handle = _get_dataset_files(dataset_handle, timeout=timeout)
+    
+        # Check memory safety
+        from .progress import check_memory_safety
+        check_memory_safety(total_size)
+    
+        # 2. Resolve specific file path if possible
+        is_obscured = any("__AUTO_RESOLVE_" in f.name for f in files)
+    
+        selected_file = file
+        if not is_obscured:
+            try:
+                 # This filters for CSV/Parquet/JSON/Excel/SQLite
+                 selected_file = _resolve_file_path(files, dataset_handle, file)
+            except Exception:
+                 # If resolution fails but it's a competition or obscured, we swap to late-res
+                 if res_type == "competition":
+                     is_obscured = True
+                 else:
+                     # If no tabular files found in metadata, we might want to just download and return path
+                     is_obscured = True
+    
+        # 3. Download via KaggleHub
+        # import kagglehub (Moved to top-level)
+        try:
+            if res_type == "competition":
+                comp_slug = resolved_handle.split('/')[-1]
+                path = kagglehub.competition_download(comp_slug)
+            else:
+                path = kagglehub.dataset_download(resolved_handle)
+    
+            # 4. Late Resolution / Fallback SCAN
+            # Supported extensions for auto-loading
+            tabular_exts = ('.csv', '.parquet', '.json', '.xlsx', '.xls', '.sqlite', '.db')
+    
+            if is_obscured or not selected_file:
+                available_files = []
+                for root, _, fs in os.walk(path):
+                    for f in fs:
+                        if f.lower().endswith(tabular_exts):
+                            available_files.append(os.path.join(root, f))
+    
+                if not available_files:
+                     logger.info(f"\u2139\ufe0f No tabular data found in '{dataset_handle}'. Returning directory path.")
+                     return path
+    
+                # If multiple, prefer the one matching 'file' if provided
+                if file:
+                    matches = [f for f in available_files if file.lower() in f.lower()]
+                    full_selected_path = matches[0] if matches else available_files[0]
+                else:
+                    full_selected_path = available_files[0]
+            else:
+                # Standard path construction
+                if os.path.isabs(selected_file):
+                    full_selected_path = selected_file
+                else:
+                    full_selected_path = os.path.join(path, selected_file)
+    
+            # 5. Load into Pandas based on extension
+            f_lower = full_selected_path.lower()
+            logger.info(f"Loading {os.path.basename(full_selected_path)}...")
+    
+            if f_lower.endswith('.csv'):
+                return pd.read_csv(full_selected_path, **kwargs)
+            elif f_lower.endswith('.parquet'):
+                return pd.read_parquet(full_selected_path, **kwargs)
+            elif f_lower.endswith('.json'):
+                return pd.read_json(full_selected_path, **kwargs)
+            elif f_lower.endswith(('.xlsx', '.xls')):
+                return pd.read_excel(full_selected_path, **kwargs)
+            elif f_lower.endswith(('.sqlite', '.db')):
+                import sqlite3
+                conn = sqlite3.connect(full_selected_path)
+                # Try to get the first table name
+                cursor = conn.cursor()
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+                table_name = cursor.fetchone()
+                if table_name:
+                    df = pd.read_sql_query(f"SELECT * FROM {table_name[0]}", conn, **kwargs)
+                    conn.close()
+                    return df
+                conn.close()
+                return full_selected_path # Return path if no tables found
+            else:
+                logger.warning(f"Unsupported format for auto-loading: {f_lower}. Returning path.")
+                return full_selected_path
+    
+        except Exception as e:
+            from .errors import DatasetNotFoundError, AuthError
+            if isinstance(e, (DatasetNotFoundError, AuthError, KaggleEaseError)):
+                raise e
+            logger.error(f"Load failed: {e}. Returning path as fallback.")
+            # Final fallback: return the path instead of crashing
+            try:
+                return path
+            except:
+>               raise KaggleEaseError(f"An error occurred while loading: {e}")
+E               kaggleease.errors.KaggleEaseError: An error occurred while loading: Invalid GetDataset API response. Expected to include a currentVersionNumber field
+
+kaggleease\load.py:301: KaggleEaseError
+---------------------------- Captured stdout call -----------------------------
+Warning: Looks like you're using an outdated `kagglehub` version (installed: 0.3.13), please consider upgrading to the latest version (1.0.0).
+------------------------------ Captured log call ------------------------------
+ERROR    kaggleease.load:load.py:296 Load failed: Invalid GetDataset API response. Expected to include a currentVersionNumber field. Returning path as fallback.
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.14.0-final-0 _______________
+
+Name                     Stmts   Miss  Cover
+--------------------------------------------
+kaggleease\__init__.py       9      2    78%
+kaggleease\auth.py          66     53    20%
+kaggleease\cache.py         53     38    28%
+kaggleease\cli.py           56     56     0%
+kaggleease\client.py        64     52    19%
+kaggleease\errors.py        31      1    97%
+kaggleease\load.py         149     96    36%
+kaggleease\magics.py        93     38    59%
+kaggleease\progress.py      57     37    35%
+kaggleease\search.py        36     24    33%
+--------------------------------------------
+TOTAL                      614    397    35%
+=========================== short test summary info ===========================
+FAILED tests/test_basic.py::test_mocked_download - kaggleease.errors.KaggleEa...
+========================= 1 failed, 8 passed in 2.94s =========================

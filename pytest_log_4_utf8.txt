@@ -1,0 +1,106 @@
+﻿.\venv\Scripts\python
+.exe : Could not 
+find platform 
+independent 
+libraries <prefix>
+At line:1 char:1
++ .\venv\Scripts\pyth
+on.exe -m pytest 
+tests/ -v 
+--cov=kaggleease > 
+pyte ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Could n   
+ ot find ...rarie    
+s <prefix>:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+============================= test session starts =============================
+platform win32 -- Python 3.14.0, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\dines\OneDrive\Documents\project\kaagleease
+configfile: pyproject.toml
+plugins: cov-7.0.0
+collected 9 items
+
+tests\test_basic.py F                                                    [ 11%]
+tests\test_errors.py ....                                                [ 55%]
+tests\test_magics.py ....                                                [100%]
+
+================================== FAILURES ===================================
+____________________________ test_mocked_download _____________________________
+
+mock_kagglehub = <MagicMock id='2185438723584'>
+mock_auth = <MagicMock id='2185438719216'>
+mock_client = <MagicMock id='2185438722240'>
+
+    def test_mocked_download(mock_kagglehub, mock_auth, mock_client):
+        """Test that download calls the mock instead of real internet."""
+        # This should NOT crash even without internet if mocks work
+        try:
+            from kaggleease import load
+            load("test/dataset")
+        except Exception as e:
+            print(f"Test crashed with error: {e}")
+            # We don't verify e here because we want to assert the mock call below
+            # but if the mock call fails, this print will help debug.
+            pass
+    
+>       mock_kagglehub.dataset_download.assert_called_with("test/dataset")
+
+tests\test_basic.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <MagicMock name='mock.dataset_download' id='2185439641680'>
+args = ('test/dataset',), kwargs = {}
+expected = "dataset_download('test/dataset')", actual = 'not called.'
+error_message = "expected call not found.\nExpected: dataset_download('test/dataset')\n  Actual: not called."
+
+    def assert_called_with(self, /, *args, **kwargs):
+        """assert that the last call was made with the specified arguments.
+    
+        Raises an AssertionError if the args and keyword args passed in are
+        different to the last call to the mock."""
+        if self.call_args is None:
+            expected = self._format_mock_call_signature(args, kwargs)
+            actual = 'not called.'
+            error_message = ('expected call not found.\nExpected: %s\n  Actual: %s'
+                    % (expected, actual))
+>           raise AssertionError(error_message)
+E           AssertionError: expected call not found.
+E           Expected: dataset_download('test/dataset')
+E             Actual: not called.
+
+..\..\..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:976: AssertionError
+---------------------------- Captured stdout call -----------------------------
+Test crashed with error: An error occurred while loading: expected string or bytes-like object, got 'MagicMock'
+------------------------------ Captured log call ------------------------------
+ERROR    kaggleease.load:load.py:296 Load failed: expected string or bytes-like object, got 'MagicMock'. Returning path as fallback.
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.14.0-final-0 _______________
+
+Name                     Stmts   Miss  Cover
+--------------------------------------------
+kaggleease\__init__.py       9      2    78%
+kaggleease\auth.py          66     53    20%
+kaggleease\cache.py         53     38    28%
+kaggleease\cli.py           56     56     0%
+kaggleease\client.py        64     52    19%
+kaggleease\errors.py        31      1    97%
+kaggleease\load.py         149     96    36%
+kaggleease\magics.py        93     38    59%
+kaggleease\progress.py      57     37    35%
+kaggleease\search.py        36     24    33%
+--------------------------------------------
+TOTAL                      614    397    35%
+=========================== short test summary info ===========================
+FAILED tests/test_basic.py::test_mocked_download - AssertionError: expected c...
+========================= 1 failed, 8 passed in 3.02s =========================

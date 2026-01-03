@@ -1,0 +1,86 @@
+﻿.\venv\Scripts\python
+.exe : Could not 
+find platform 
+independent 
+libraries <prefix>
+At line:1 char:1
++ .\venv\Scripts\pyth
+on.exe -m pytest 
+tests/test_basic.py 
+-v > pytest_l ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Could n   
+ ot find ...rarie    
+s <prefix>:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+============================= test session starts =============================
+platform win32 -- Python 3.14.0, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\dines\OneDrive\Documents\project\kaagleease
+configfile: pyproject.toml
+plugins: cov-7.0.0
+collected 1 item
+
+tests\test_basic.py F                                                    [100%]
+
+================================== FAILURES ===================================
+____________________________ test_mocked_download _____________________________
+
+mock_kagglehub = <MagicMock id='2106184318128'>
+mock_auth = <MagicMock id='2105699631520'>
+mock_client = <MagicMock id='2106184313424'>
+
+    def test_mocked_download(mock_kagglehub, mock_auth, mock_client):
+        """Test that download calls the mock instead of real internet."""
+        # This should NOT crash even without internet if mocks work
+        try:
+            from kaggleease import load
+            load("test/dataset")
+        except Exception as e:
+            print(f"Test crashed with error: {e}")
+            # We don't verify e here because we want to assert the mock call below
+            # but if the mock call fails, this print will help debug.
+            pass
+    
+>       mock_kagglehub.dataset_download.assert_called_with("test/dataset")
+
+tests\test_basic.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <MagicMock name='mock.dataset_download' id='2106184318464'>
+args = ('test/dataset',), kwargs = {}
+expected = "dataset_download('test/dataset')", actual = 'not called.'
+error_message = "expected call not found.\nExpected: dataset_download('test/dataset')\n  Actual: not called."
+
+    def assert_called_with(self, /, *args, **kwargs):
+        """assert that the last call was made with the specified arguments.
+    
+        Raises an AssertionError if the args and keyword args passed in are
+        different to the last call to the mock."""
+        if self.call_args is None:
+            expected = self._format_mock_call_signature(args, kwargs)
+            actual = 'not called.'
+            error_message = ('expected call not found.\nExpected: %s\n  Actual: %s'
+                    % (expected, actual))
+>           raise AssertionError(error_message)
+E           AssertionError: expected call not found.
+E           Expected: dataset_download('test/dataset')
+E             Actual: not called.
+
+..\..\..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:976: AssertionError
+---------------------------- Captured stdout call -----------------------------
+Test crashed with error: An error occurred while loading: expected string or bytes-like object, got 'MagicMock'
+------------------------------ Captured log call ------------------------------
+ERROR    kaggleease.load:load.py:296 Load failed: expected string or bytes-like object, got 'MagicMock'. Returning path as fallback.
+=========================== short test summary info ===========================
+FAILED tests/test_basic.py::test_mocked_download - AssertionError: expected c...
+============================== 1 failed in 2.72s ==============================

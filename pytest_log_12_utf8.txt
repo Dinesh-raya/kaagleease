@@ -1,0 +1,55 @@
+﻿.\venv\Scripts\python
+.exe : Could not 
+find platform 
+independent 
+libraries <prefix>
+At line:1 char:1
++ .\venv\Scripts\pyth
+on.exe -m pytest 
+tests/ -v 
+--cov=kaggleease > 
+pyte ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Could n   
+ ot find ...rarie    
+s <prefix>:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+============================= test session starts =============================
+platform win32 -- Python 3.14.0, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\dines\OneDrive\Documents\project\kaagleease
+configfile: pyproject.toml
+plugins: cov-7.0.0
+collected 9 items
+
+tests\test_basic.py .                                                    [ 11%]
+tests\test_errors.py ....                                                [ 55%]
+tests\test_magics.py ....                                                [100%]
+
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.14.0-final-0 _______________
+
+Name                     Stmts   Miss  Cover
+--------------------------------------------
+kaggleease\__init__.py       9      2    78%
+kaggleease\auth.py          66     53    20%
+kaggleease\cache.py         53     38    28%
+kaggleease\cli.py           56     56     0%
+kaggleease\client.py        64     52    19%
+kaggleease\errors.py        31      1    97%
+kaggleease\load.py         149     90    40%
+kaggleease\magics.py        93     38    59%
+kaggleease\progress.py      57     37    35%
+kaggleease\search.py        36     24    33%
+--------------------------------------------
+TOTAL                      614    391    36%
+============================== 9 passed in 2.37s ==============================

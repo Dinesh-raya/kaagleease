@@ -1,0 +1,273 @@
+﻿.\venv\Scripts\python
+.exe : Could not 
+find platform 
+independent 
+libraries <prefix>
+At line:1 char:1
++ .\venv\Scripts\pyth
+on.exe -m pytest 
+tests/ -v 
+--cov=kaggleease > 
+pyte ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Could n   
+ ot find ...rarie    
+s <prefix>:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+============================= test session starts =============================
+platform win32 -- Python 3.14.0, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\dines\OneDrive\Documents\project\kaagleease
+configfile: pyproject.toml
+plugins: cov-7.0.0
+collected 9 items
+
+tests\test_basic.py E                                                    [ 11%]
+tests\test_errors.py EEEE                                                [ 55%]
+tests\test_magics.py EEEE                                                [100%]
+
+=================================== ERRORS ====================================
+___________________ ERROR at setup of test_mocked_download ____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000019D174DF6F0>
+
+    @pytest.fixture(autouse=True)
+    def mock_kagglehub(monkeypatch):
+        """
+        Mock the kagglehub module globally and specifically in our modules.
+        Autouse ensures no network leaks in CI.
+        """
+        mock = MagicMock()
+        mock.dataset_download.return_value = "/tmp/mock/dataset"
+        mock.competition_download.return_value = "/tmp/mock/competition"
+    
+        # Patch in sys.modules for new imports
+        monkeypatch.setitem(sys.modules, "kagglehub", mock)
+    
+        # Patch in already-imported modules
+        import kaggleease.load
+>       monkeypatch.setattr(kaggleease.load, "kagglehub", mock)
+E       AttributeError: <function load at 0x0000019D175FDB10> has no attribute 'kagglehub'
+
+tests\conftest.py:70: AttributeError
+______________________ ERROR at setup of test_hierarchy _______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000019D176A4050>
+
+    @pytest.fixture(autouse=True)
+    def mock_kagglehub(monkeypatch):
+        """
+        Mock the kagglehub module globally and specifically in our modules.
+        Autouse ensures no network leaks in CI.
+        """
+        mock = MagicMock()
+        mock.dataset_download.return_value = "/tmp/mock/dataset"
+        mock.competition_download.return_value = "/tmp/mock/competition"
+    
+        # Patch in sys.modules for new imports
+        monkeypatch.setitem(sys.modules, "kagglehub", mock)
+    
+        # Patch in already-imported modules
+        import kaggleease.load
+>       monkeypatch.setattr(kaggleease.load, "kagglehub", mock)
+E       AttributeError: <function load at 0x0000019D175FDB10> has no attribute 'kagglehub'
+
+tests\conftest.py:70: AttributeError
+________________ ERROR at setup of test_data_format_hierarchy _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000019D1760C950>
+
+    @pytest.fixture(autouse=True)
+    def mock_kagglehub(monkeypatch):
+        """
+        Mock the kagglehub module globally and specifically in our modules.
+        Autouse ensures no network leaks in CI.
+        """
+        mock = MagicMock()
+        mock.dataset_download.return_value = "/tmp/mock/dataset"
+        mock.competition_download.return_value = "/tmp/mock/competition"
+    
+        # Patch in sys.modules for new imports
+        monkeypatch.setitem(sys.modules, "kagglehub", mock)
+    
+        # Patch in already-imported modules
+        import kaggleease.load
+>       monkeypatch.setattr(kaggleease.load, "kagglehub", mock)
+E       AttributeError: <function load at 0x0000019D175FDB10> has no attribute 'kagglehub'
+
+tests\conftest.py:70: AttributeError
+_______________ ERROR at setup of test_error_message_formatting _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000019D175D5370>
+
+    @pytest.fixture(autouse=True)
+    def mock_kagglehub(monkeypatch):
+        """
+        Mock the kagglehub module globally and specifically in our modules.
+        Autouse ensures no network leaks in CI.
+        """
+        mock = MagicMock()
+        mock.dataset_download.return_value = "/tmp/mock/dataset"
+        mock.competition_download.return_value = "/tmp/mock/competition"
+    
+        # Patch in sys.modules for new imports
+        monkeypatch.setitem(sys.modules, "kagglehub", mock)
+    
+        # Patch in already-imported modules
+        import kaggleease.load
+>       monkeypatch.setattr(kaggleease.load, "kagglehub", mock)
+E       AttributeError: <function load at 0x0000019D175FDB10> has no attribute 'kagglehub'
+
+tests\conftest.py:70: AttributeError
+____________________ ERROR at setup of test_network_error _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000019D175D5E10>
+
+    @pytest.fixture(autouse=True)
+    def mock_kagglehub(monkeypatch):
+        """
+        Mock the kagglehub module globally and specifically in our modules.
+        Autouse ensures no network leaks in CI.
+        """
+        mock = MagicMock()
+        mock.dataset_download.return_value = "/tmp/mock/dataset"
+        mock.competition_download.return_value = "/tmp/mock/competition"
+    
+        # Patch in sys.modules for new imports
+        monkeypatch.setitem(sys.modules, "kagglehub", mock)
+    
+        # Patch in already-imported modules
+        import kaggleease.load
+>       monkeypatch.setattr(kaggleease.load, "kagglehub", mock)
+E       AttributeError: <function load at 0x0000019D175FDB10> has no attribute 'kagglehub'
+
+tests\conftest.py:70: AttributeError
+___________________ ERROR at setup of test_controller_help ____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000019D17597050>
+
+    @pytest.fixture(autouse=True)
+    def mock_kagglehub(monkeypatch):
+        """
+        Mock the kagglehub module globally and specifically in our modules.
+        Autouse ensures no network leaks in CI.
+        """
+        mock = MagicMock()
+        mock.dataset_download.return_value = "/tmp/mock/dataset"
+        mock.competition_download.return_value = "/tmp/mock/competition"
+    
+        # Patch in sys.modules for new imports
+        monkeypatch.setitem(sys.modules, "kagglehub", mock)
+    
+        # Patch in already-imported modules
+        import kaggleease.load
+>       monkeypatch.setattr(kaggleease.load, "kagglehub", mock)
+E       AttributeError: <function load at 0x0000019D175FDB10> has no attribute 'kagglehub'
+
+tests\conftest.py:70: AttributeError
+___________________ ERROR at setup of test_controller_load ____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000019D176E1250>
+
+    @pytest.fixture(autouse=True)
+    def mock_kagglehub(monkeypatch):
+        """
+        Mock the kagglehub module globally and specifically in our modules.
+        Autouse ensures no network leaks in CI.
+        """
+        mock = MagicMock()
+        mock.dataset_download.return_value = "/tmp/mock/dataset"
+        mock.competition_download.return_value = "/tmp/mock/competition"
+    
+        # Patch in sys.modules for new imports
+        monkeypatch.setitem(sys.modules, "kagglehub", mock)
+    
+        # Patch in already-imported modules
+        import kaggleease.load
+>       monkeypatch.setattr(kaggleease.load, "kagglehub", mock)
+E       AttributeError: <function load at 0x0000019D175FDB10> has no attribute 'kagglehub'
+
+tests\conftest.py:70: AttributeError
+__________________ ERROR at setup of test_controller_search ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000019D176C0140>
+
+    @pytest.fixture(autouse=True)
+    def mock_kagglehub(monkeypatch):
+        """
+        Mock the kagglehub module globally and specifically in our modules.
+        Autouse ensures no network leaks in CI.
+        """
+        mock = MagicMock()
+        mock.dataset_download.return_value = "/tmp/mock/dataset"
+        mock.competition_download.return_value = "/tmp/mock/competition"
+    
+        # Patch in sys.modules for new imports
+        monkeypatch.setitem(sys.modules, "kagglehub", mock)
+    
+        # Patch in already-imported modules
+        import kaggleease.load
+>       monkeypatch.setattr(kaggleease.load, "kagglehub", mock)
+E       AttributeError: <function load at 0x0000019D175FDB10> has no attribute 'kagglehub'
+
+tests\conftest.py:70: AttributeError
+___________________ ERROR at setup of test_controller_error ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000019D176C27B0>
+
+    @pytest.fixture(autouse=True)
+    def mock_kagglehub(monkeypatch):
+        """
+        Mock the kagglehub module globally and specifically in our modules.
+        Autouse ensures no network leaks in CI.
+        """
+        mock = MagicMock()
+        mock.dataset_download.return_value = "/tmp/mock/dataset"
+        mock.competition_download.return_value = "/tmp/mock/competition"
+    
+        # Patch in sys.modules for new imports
+        monkeypatch.setitem(sys.modules, "kagglehub", mock)
+    
+        # Patch in already-imported modules
+        import kaggleease.load
+>       monkeypatch.setattr(kaggleease.load, "kagglehub", mock)
+E       AttributeError: <function load at 0x0000019D175FDB10> has no attribute 'kagglehub'
+
+tests\conftest.py:70: AttributeError
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.14.0-final-0 _______________
+
+Name                     Stmts   Miss  Cover
+--------------------------------------------
+kaggleease\__init__.py       9      2    78%
+kaggleease\auth.py          66     53    20%
+kaggleease\cache.py         53     38    28%
+kaggleease\cli.py           56     56     0%
+kaggleease\client.py        64     52    19%
+kaggleease\errors.py        31     15    52%
+kaggleease\load.py         149    133    11%
+kaggleease\magics.py        93     70    25%
+kaggleease\progress.py      57     41    28%
+kaggleease\search.py        36     24    33%
+--------------------------------------------
+TOTAL                      614    484    21%
+=========================== short test summary info ===========================
+ERROR tests/test_basic.py::test_mocked_download - AttributeError: <function l...
+ERROR tests/test_errors.py::test_hierarchy - AttributeError: <function load a...
+ERROR tests/test_errors.py::test_data_format_hierarchy - AttributeError: <fun...
+ERROR tests/test_errors.py::test_error_message_formatting - AttributeError: <...
+ERROR tests/test_errors.py::test_network_error - AttributeError: <function lo...
+ERROR tests/test_magics.py::test_controller_help - AttributeError: <function ...
+ERROR tests/test_magics.py::test_controller_load - AttributeError: <function ...
+ERROR tests/test_magics.py::test_controller_search - AttributeError: <functio...
+ERROR tests/test_magics.py::test_controller_error - AttributeError: <function...
+============================== 9 errors in 2.80s ==============================

@@ -3,45 +3,67 @@ import sys
 import os
 from unittest.mock import MagicMock
 
-# Ensure the package is importable
-# sys.path hacking removed; relying on pip install -e .
+# --- EXTREME ISOLATION: Mock dependencies before any collection ---
 
-@pytest.fixture
-def mock_kagglehub(monkeypatch):
-    """
-    Mock the kagglehub module globally by replacing it in sys.modules.
-    """
-    mock = MagicMock()
-    mock.dataset_download.return_value = "/tmp/mock/dataset"
-    mock.competition_download.return_value = "/tmp/mock/competition"
-    
-    # Nuclear Option: Patch sys.modules directly so ANY import gets the mock
-    monkeypatch.setitem(sys.modules, "kagglehub", mock)
-    return mock
+# 1. Mock requests
+mock_resp = MagicMock()
+mock_resp.status_code = 200
+mock_resp.json.return_value = {"currentVersionNumber": 1, "files": []}
+mock_resp.text = '{"currentVersionNumber": 1, "files": []}'
+mock_resp.url = "https://www.kaggle.com/test/dataset"
+mock_resp.headers.get.return_value = "1.0.0"
+mock_resp.__enter__.return_value = mock_resp
 
-@pytest.fixture
+mock_requests_lib = MagicMock()
+mock_requests_lib.get.return_value = mock_resp
+mock_requests_lib.post.return_value = mock_resp
+sys.modules["requests"] = mock_requests_lib
+
+# 2. Mock kagglehub
+mock_kh = MagicMock()
+mock_kh.dataset_download.return_value = "/tmp/mock/dataset"
+mock_kh.competition_download.return_value = "/tmp/mock/competition"
+sys.modules["kagglehub"] = mock_kh
+
+# 3. Mock psutil
+mock_ps = MagicMock()
+mock_ps.virtual_memory.return_value.available = 8 * 1024**3
+sys.modules["psutil"] = mock_ps
+
+# --- Fixtures for test-level control ---
+
+@pytest.fixture(autouse=True)
+def mock_kagglehub():
+    return sys.modules["kagglehub"]
+
+@pytest.fixture(autouse=True)
+def mock_requests():
+    return sys.modules["requests"]
+
+@pytest.fixture(autouse=True)
 def mock_auth(monkeypatch):
     """
     Mock authentication to always succeed.
     """
     mock = MagicMock()
-    # Since load.py now does 'from . import auth' and calls 'auth.setup_auth()',
-    # patching 'kaggleease.auth.setup_auth' works globally!
+    # We patch the auth module directly
     import kaggleease.auth
     monkeypatch.setattr(kaggleease.auth, "setup_auth", mock)
     return mock
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_client(monkeypatch):
     """
     Mock the KaggleClient class via attribute patching.
     """
-    mock = MagicMock()
-    mock.return_value.list_files.return_value = [
+    mock_instance = MagicMock()
+    mock_instance.list_files.return_value = [
         {"name": "train.csv", "size": 1024, "type": "dataset"}
     ]
+    mock_instance.search_datasets.return_value = [
+        {"handle": "test/dataset", "title": "Test Dataset", "size": 1024, "votes": 10}
+    ]
     
-    # Import the module so we can patch the class attribute on it
     import kaggleease.client
-    monkeypatch.setattr(kaggleease.client, "KaggleClient", mock)
-    return mock
+    monkeypatch.setattr(kaggleease.client, "KaggleClient", lambda: mock_instance)
+    return mock_instance
