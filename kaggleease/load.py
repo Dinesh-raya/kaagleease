@@ -54,9 +54,9 @@ def _validate_dataset_handle(dataset_handle: str) -> None:
             f"Invalid characters in dataset handle: '{dataset_handle}'. "
             "Only alphanumeric characters, hyphens, and underscores are allowed."
         )
-
-def _get_dataset_files(dataset_handle: str, timeout: int = 30) -> Tuple[List, int]:
     """
+def _get_dataset_files(dataset_handle: str, timeout: int = 30) -> Tuple[List, int]:
+    
     Performs a metadata pre-scan of the dataset.
 
     Args:
