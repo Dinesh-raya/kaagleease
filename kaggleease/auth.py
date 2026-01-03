@@ -82,7 +82,7 @@ def setup_auth() -> None:
         # Mark authentication as completed for this thread
         _auth_cache[thread_id] = True
 
-def get_kaggle_credentials() -> tuple[Optional[str], Optional[str]]:
+def get_kaggle_credentials() -> Tuple[Optional[str], Optional[str]]:
     """
     Retrieves Kaggle credentials from environment variables or kaggle.json.
     

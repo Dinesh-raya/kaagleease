@@ -54,7 +54,6 @@ def _validate_dataset_handle(dataset_handle: str) -> None:
             f"Invalid characters in dataset handle: '{dataset_handle}'. "
             "Only alphanumeric characters, hyphens, and underscores are allowed."
         )
-
 def _get_dataset_files(dataset_handle: str, timeout: int = 300) -> Tuple[List, int, str, str]:
     """
     Finds files for a dataset handle, handles implicit resolution and competitions.
@@ -170,7 +169,6 @@ def _resolve_file_path(files: List, dataset_handle: str, file_name: Optional[str
         )
 
     return supported_files[0]
-
 
 def load(dataset_handle: str, file: Optional[str] = None, timeout: int = 300, **kwargs) -> Union[pd.DataFrame, str]:
     """

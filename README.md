@@ -2,12 +2,17 @@
 
 # KaggleEase 🚀
 
+
+**[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Dinesh-raya/kaagleease)**
+
+
 ![CI](https://github.com/Dinesh-raya/kaagleease/actions/workflows/ci.yml/badge.svg)
 ![PyPI](https://img.shields.io/pypi/v/kaggleease)
 ![Python](https://img.shields.io/pypi/pyversions/kaggleease)
 ![License](https://img.shields.io/github/license/Dinesh-raya/kaagleease)
 
 ### The Universal Kaggle Gateway for Data Scientists
+
 
 KaggleEase is a minimalist, high-performance Python library designed to bridge the gap between Kaggle's vast data ecosystem and your local or Colab development environment. It replaces the heavy official Kaggle package with a smart, self-healing REST client that "just works."
 

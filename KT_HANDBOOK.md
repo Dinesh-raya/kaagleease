@@ -2,7 +2,7 @@
 
 Welcome to the team! 🚀 
 
-This document is designed to get you up to speed with **KaggleEase** as quickly as possible. It covers the "Why", the "How", and the deep technical details of the implementation. Think of this as a brain dump from the senior engineers to you.
+This document is designed to get you up to speed with **KaggleEase** as quickly as possible. It covers the "Why", the "How", and the deep technical details of the implementation. Think of this as a br[...] 
 
 ---
 
@@ -10,7 +10,7 @@ This document is designed to get you up to speed with **KaggleEase** as quickly 
 
 ### **Why does this exist?**
 Kaggle's official API (`kaggle`) and library (`kagglehub`) are powerful but can be verbose for quick data analysis. 
-- **The Problem**: A Data Scientist just wants to "play with the Titanic dataset". They don't want to manually search handles, authenticate via 5 steps, download a zip, unzip it, find the CSV, and type `pd.read_csv`.
+- **The Problem**: A Data Scientist just wants to "play with the Titanic dataset". They don't want to manually search handles, authenticate via 5 steps, download a zip, unzip it, find the CSV, and typ[...]
 - **The Solution**: `%kaggle load titanic`. One command. Zero friction.
 
 ### **Core Philosophy**
@@ -24,19 +24,23 @@ Kaggle's official API (`kaggle`) and library (`kagglehub`) are powerful but can 
 
 The flow of a typical command `%kaggle load titanic` looks like this:
 
-```mermaid
-graph TD
-    User[User (Notebook)] -->|%kaggle load titanic| Magic[magics.py]
-    Magic -->|load("titanic")| Load[load.py]
-    Load -->|1. Setup Auth| Auth[auth.py]
-    Load -->|2. Resolve Metadata| Client[client.py]
-    Client -->|List Files| JSON[Kaggle API]
-    Load -->|3. Smart Resolution| Logic[Auto-Resolve Logic]
-    Logic -->|Decide File| FileSelect[train.csv]
-    Load -->|4. Download| Hub[kagglehub / Internal]
-    Load -->|5. Read File| Pandas[pandas]
-    Pandas -->|DataFrame| User
+- User (Notebook)
+  - triggers the KaggleEase magic: %kaggle load titanic
+- magics.py
+  - parses the magic and calls load("titanic")
+- load.py
+  - 1. Setup Auth (auth.py)
+  - 2. Resolve Metadata (client.py)
+  - 3. Smart Resolution (search/logic)
+  - 4. Download (kagglehub)
+  - 5. Read File (pandas) → returns DataFrame
+
+Example (exact notebook command)
+```bash
+%kaggle load titanic
 ```
+
+Note: the diagram previously used a Mermaid label containing a percent sign which caused Mermaid parsing errors in GitHub's renderer. Above we replaced the diagram with a simple Markdown flow and preserved the exact `%kaggle load titanic` example in a code block for clarity and copy-paste.
 
 ---
 
@@ -66,7 +70,7 @@ graph TD
 
 ### 4. `client.py` (The Scout) 🔭
 **Purpose**: A standardized wrapper around the raw Kaggle API.
-**Why needed?** `kagglehub` downloads files but doesn't easily expose *metadata* (like "what files are in this dataset?") before downloading. `client.py` fills this gap using the official `kaggle` API client but wrapped for safety.
+**Why needed?** `kagglehub` downloads files but doesn't easily expose *metadata* (like "what files are in this dataset?") before downloading. `client.py` fills this gap using the official `kaggle` API[...]
 
 ### 5. `search.py` (The detective) 🕵️
 **Purpose**: Finds datasets when the user guesses the name.
