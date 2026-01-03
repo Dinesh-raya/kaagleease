@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "kaggleease"
 description = "The fastest, notebook-first way to load Kaggle datasets into pandas with one line."
 readme = "README.md"
-license = {file = "LICENSE"}
+license = "MIT"
 authors = [
     {name = "KaggleEase Contributors"}
 ]
@@ -15,7 +15,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -78,3 +77,6 @@ addopts = "-ra -q"
 testpaths = [
     "tests",
 ]
+[tool.setuptools.packages.find]
+include = ["kaggleease*"]
+exclude = ["dist_pkg*", "tests*"]
