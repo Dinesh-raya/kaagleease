@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -79,4 +79,4 @@ testpaths = [
 ]
 [tool.setuptools.packages.find]
 include = ["kaggleease*"]
-exclude = ["dist_pkg*", "tests*"]
+exclude = ["dist_pkg*", "tests*", "logs*"]

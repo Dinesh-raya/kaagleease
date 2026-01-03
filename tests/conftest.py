@@ -3,32 +3,37 @@ import sys
 import os
 from unittest.mock import MagicMock
 
-# --- EXTREME ISOLATION: Mock dependencies before any collection ---
+# --- EXTREME ISOLATION: Mock dependencies via standard hooks ---
 
-# 1. Mock requests
-mock_resp = MagicMock()
-mock_resp.status_code = 200
-mock_resp.json.return_value = {"currentVersionNumber": 1, "files": []}
-mock_resp.text = '{"currentVersionNumber": 1, "files": []}'
-mock_resp.url = "https://www.kaggle.com/test/dataset"
-mock_resp.headers.get.return_value = "1.0.0"
-mock_resp.__enter__.return_value = mock_resp
+def pytest_sessionstart(session):
+    """
+    Called after the Session object has been created and before performing collection
+    and entering the run test loop.
+    """
+    # 1. Mock requests
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {"currentVersionNumber": 1, "files": []}
+    mock_resp.text = '{"currentVersionNumber": 1, "files": []}'
+    mock_resp.url = "https://www.kaggle.com/test/dataset"
+    mock_resp.headers.get.return_value = "1.0.0"
+    mock_resp.__enter__.return_value = mock_resp
 
-mock_requests_lib = MagicMock()
-mock_requests_lib.get.return_value = mock_resp
-mock_requests_lib.post.return_value = mock_resp
-sys.modules["requests"] = mock_requests_lib
+    mock_requests_lib = MagicMock()
+    mock_requests_lib.get.return_value = mock_resp
+    mock_requests_lib.post.return_value = mock_resp
+    sys.modules["requests"] = mock_requests_lib
 
-# 2. Mock kagglehub
-mock_kh = MagicMock()
-mock_kh.dataset_download.return_value = "/tmp/mock/dataset"
-mock_kh.competition_download.return_value = "/tmp/mock/competition"
-sys.modules["kagglehub"] = mock_kh
+    # 2. Mock kagglehub
+    mock_kh = MagicMock()
+    mock_kh.dataset_download.return_value = "/tmp/mock/dataset"
+    mock_kh.competition_download.return_value = "/tmp/mock/competition"
+    sys.modules["kagglehub"] = mock_kh
 
-# 3. Mock psutil
-mock_ps = MagicMock()
-mock_ps.virtual_memory.return_value.available = 8 * 1024**3
-sys.modules["psutil"] = mock_ps
+    # 3. Mock psutil
+    mock_ps = MagicMock()
+    mock_ps.virtual_memory.return_value.available = 8 * 1024**3
+    sys.modules["psutil"] = mock_ps
 
 # --- Fixtures for test-level control ---
 
