@@ -10,7 +10,6 @@ license = {file = "LICENSE"}
 authors = [
     {name = "KaggleEase Contributors"}
 ]
-keywords = ["kaggle", "pandas", "data-loading", "machine-learning", "notebook", "utility"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -22,7 +21,6 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -42,7 +40,6 @@ version = "1.3.10"
 [project.optional-dependencies]
 dev = [
     "pytest>=6.0",
-    "pytest-cov>=2.0",
     "black>=21.0",
     "flake8>=3.8",
 ]
@@ -59,7 +56,7 @@ kaggleease = "kaggleease.cli:cli"
 
 [tool.black]
 line-length = 88
-target-version = ['py37', 'py38', 'py39', 'py310', 'py311', 'py312']
+target-version = ['py37', 'py38', 'py39', 'py310', 'py311']
 include = '\.pyi?$'
 extend-exclude = '''
 /(

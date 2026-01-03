@@ -8,10 +8,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-# Constants for memory safety
-MEMORY_THRESHOLD = 0.5  # 50% of available RAM
-LARGE_FILE_THRESHOLD = 1 * 1024**3  # 1GB
-
 
 class ProgressBar:
     """Simple progress bar for file downloads."""
@@ -74,8 +70,8 @@ def check_memory_safety(file_size_bytes: int):
         try:
             available_ram = psutil.virtual_memory().available
             # Conservative estimate: Pandas can take 5x-10x the CSV file size in RAM, 
-            # but we'll use a threshold for a strong warning.
-            if file_size_bytes > available_ram * MEMORY_THRESHOLD:
+            # but we'll use 50% of available RAM as a threshold for a strong warning.
+            if file_size_bytes > available_ram * 0.5:
                 file_size_str = ProgressBar._format_bytes(file_size_bytes)
                 ram_str = ProgressBar._format_bytes(available_ram)
                 logger.warning(
@@ -88,5 +84,5 @@ def check_memory_safety(file_size_bytes: int):
             logger.debug(f"Failed to check memory safety: {e}")
     else:
         # Fallback if psutil is missing (though we added it to dependencies)
-        if file_size_bytes > LARGE_FILE_THRESHOLD:
+        if file_size_bytes > 1*1024**3: # 1GB
              logger.warning("Large file detected (>1GB). Ensure you have enough RAM to load it.")

@@ -56,7 +56,7 @@ def setup_auth() -> None:
             except ImportError:
                 raise AuthError("Failed to import google.colab.files. This function is designed to work in a Google Colab environment.")
             except Exception as e:
-                raise AuthError(f"An error occurred during the Colab file upload process: {e}") from e
+                raise AuthError(f"An error occurred during the Colab file upload process: {e}")
 
         # Case 2: Local environment check
         if not kaggle_json_path.exists():
@@ -105,11 +105,5 @@ def get_kaggle_credentials() -> tuple[Optional[str], Optional[str]]:
         except Exception as e:
             logger.warning(f"Failed to read credentials from {kaggle_json_path}: {e}")
             
-    # Final validation
-    if username is not None and not str(username).strip():
-        username = None
-    if key is not None and not str(key).strip():
-        key = None
-        
-    return username, key
+    return None, None
 

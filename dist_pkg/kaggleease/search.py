@@ -1,14 +1,10 @@
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional
 from .auth import setup_auth
 import re
 import logging
 from .errors import DatasetNotFoundError
 
 logger = logging.getLogger(__name__)
-
-# Constants for memory safety
-MEMORY_THRESHOLD = 0.5  # 50% of available RAM
-LARGE_FILE_THRESHOLD = 1 * 1024**3  # 1GB
 
 
 def _format_size(bytes_size: int) -> str:
@@ -30,10 +26,7 @@ def _format_size(bytes_size: int) -> str:
     else:
         return f"{bytes_size / (1024 ** 3):.2f} GB"
 
-import functools
-
-@functools.lru_cache(maxsize=32)
-def search(query: str, top: int = 5, timeout: int = 30) -> List[Dict[str, Union[str, int]]]:
+def search(query: str, top: int = 5, timeout: int = 30) -> List[Dict[str, str|int]]:
     """
     Searches for datasets on Kaggle.
 

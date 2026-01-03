@@ -4,7 +4,7 @@ from typing import Tuple, List, Optional, Union
 import pandas as pd
 from pathlib import Path
 import logging
-from . import auth
+from .auth import setup_auth
 from .cache import get_dataset_path
 from .errors import (
     DataFormatError,
@@ -12,9 +12,7 @@ from .errors import (
     MultipleFilesError,
     UnsupportedFormatError,
     KaggleEaseError,
-    NetworkError,
 )
-import kagglehub
 from .progress import check_memory_safety
 
 logger = logging.getLogger(__name__)
@@ -55,20 +53,30 @@ def _validate_dataset_handle(dataset_handle: str) -> None:
             "Only alphanumeric characters, hyphens, and underscores are allowed."
         )
 
-def _get_dataset_files(dataset_handle: str, timeout: int = 300) -> Tuple[List, int, str, str]:
+def _get_dataset_files(dataset_handle: str, timeout: int = 30) -> Tuple[List, int]:
     """
-    Finds files for a dataset handle, handles implicit resolution and competitions.
-    
+    Performs a metadata pre-scan of the dataset.
+
     Args:
-        dataset_handle (str): The Kaggle dataset handle or slug.
-        timeout (int): Timeout in seconds for API calls.
+        dataset_handle (str): The Kaggle dataset handle.
+        timeout (int): Timeout in seconds for the API call.
 
     Returns:
-        Tuple[List, int, str, str]: (standard_files, total_size, resource_type, resolved_handle)
+        tuple: A tuple containing (files, total_size) where files is a list of file objects
+               and total_size is the sum of all file sizes in bytes.
+
+    Raises:
+        DatasetNotFoundError: If the dataset cannot be found or accessed.
+        AuthError: If authentication fails.
+    """
+def _get_dataset_files(dataset_handle, timeout=300):
+    """
+    Finds files for a dataset handle, handles implicit resolution and competitions.
+    Returns: (standard_files, total_size, resource_type, resolved_handle)
     """
     try:
-        import kaggleease.client
-        client = kaggleease.client.KaggleClient()
+        from .client import KaggleClient
+        client = KaggleClient()
         files = client.list_files(dataset_handle)
         
         # files is a list of dicts like [{"name": "...", "size": ..., "type": "..."}]
@@ -174,33 +182,9 @@ def _resolve_file_path(files: List, dataset_handle: str, file_name: Optional[str
 
 def load(dataset_handle: str, file: Optional[str] = None, timeout: int = 300, **kwargs) -> Union[pd.DataFrame, str]:
     """
-    The universal gateway to load Kaggle data into memory or disk.
-    
-    This function handles authentication, dataset resolution, downloads, 
-    and automatic loading of various tabular formats (CSV, Parquet, JSON, Excel, SQLite).
-    
-    Args:
-        dataset_handle (str): The Kaggle dataset handle (e.g., 'owner/slug') or slug (e.g., 'titanic').
-        file (str, optional): Specific filename to load. If omitted, KaggleEase auto-resolves the best file.
-        timeout (int): Max time in seconds for the download operation. Default is 300s.
-        **kwargs: Additional arguments passed to the underlying pandas read function 
-                  (e.g., `chunksize=1000`, `index_col=0`).
-
-    Returns:
-        Union[pd.DataFrame, str]: A pandas DataFrame if a supported tabular file is found,
-                                 otherwise the local directory path string.
-
-    Raises:
-        DatasetNotFoundError: If the repository handle is invalid or not reachable.
-        AuthError: If Kaggle credentials are missing or invalid.
-        DataFormatError: if the specified file is not found or unsupported.
-        KaggleEaseError: For general library failures.
-        
-    Example:
-        >>> df = load("titanic")
-        >>> df_custom = load("user/data", file="raw.csv", index_col="id")
+    The main function to load a Kaggle dataset into a pandas DataFrame or return the path.
     """
-    auth.setup_auth()
+    setup_auth()
     
     # 1. Resolve files, resource type, and resolved handle
     files, total_size, res_type, resolved_handle = _get_dataset_files(dataset_handle, timeout=timeout)
@@ -226,7 +210,7 @@ def load(dataset_handle: str, file: Optional[str] = None, timeout: int = 300, **
                  is_obscured = True
 
     # 3. Download via KaggleHub
-    # import kagglehub (Moved to top-level)
+    import kagglehub
     try:
         if res_type == "competition":
             comp_slug = resolved_handle.split('/')[-1]
