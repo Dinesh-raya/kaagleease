@@ -181,7 +181,6 @@ def _resolve_file_path(files: List, dataset_handle: str, file_name: Optional[str
 
     return supported_files[0]
 
-
 def load(dataset_handle: str, file: Optional[str] = None, timeout: int = 300, **kwargs) -> Union[pd.DataFrame, str]:
     """
     The main function to load a Kaggle dataset into a pandas DataFrame or return the path.
